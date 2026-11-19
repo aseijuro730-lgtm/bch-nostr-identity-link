@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BCH × Nostr Identity Link — one key, two networks</title>
+<meta name="description" content="Cryptographically link a Bitcoin Cash address to a Nostr identity. Same-key derivation + mutual signatures. No server, no funds, keys never leave your browser. BCH BLAZE 2026 — Paytaca Decentralized Identity bounty.">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="hero">
+  <div class="badge">BCH BLAZE 2026 · Paytaca Decentralized Identity Bounty</div>
+  <h1>One key. <span>Two networks.</span></h1>
+  <p>Link a Bitcoin Cash address to a Nostr identity with cryptography — not with a
+  username, not with a platform. Prove both belong to the same person, verifiable by
+  anyone, with zero on-chain fees and zero servers.</p>
+</header>
+
+<main>
+  <!-- 1. IDENTITY -->
+  <section class="card" id="sec-identity">
+    <h2><span class="n">1</span>Your identity</h2>
+    <p class="sub">Generate a fresh key, or bring your own. Everything happens in this page — no key is ever sent anywhere.</p>
+    <div class="tabs" role="tablist">
+      <button id="tab-new" class="on" type="button">Generate new key</button>
+      <button id="tab-import" type="button">Import existing keys</button>
+    </div>
+
+    <div id="pane-new">
+      <div class="row">
+        <button class="primary" id="btn-generate" type="button">Generate identity</button>
+      </div>
+      <div class="callout"><b>Save your nsec.</b> It is the only copy of your private key. If you lose it, the link
+      cannot be remade for this address/npub pair. Never share it — anyone with it controls both identities.</div>
+    </div>
+
+    <div id="pane-import" class="hidden">
+      <label for="in-nsec">nsec (Nostr private key, bech32) — same-key mode</label>
+      <input type="text" id="in-nsec" placeholder="nsec1…" autocomplete="off">
+      <label for="in-wif">BCH private key (WIF, compressed) — only for cross-key mode</label>
+      <input type="text" id="in-wif" placeholder="K… or L… (leave empty for same-key mode)" autocomplete="off">
+      <div class="row">
+        <button class="primary" id="btn-import" type="button">Import keys</button>
+      </div>
+      <p class="status" id="import-status"></p>
+    </div>
+
+    <div id="identity-out" class="hidden">
+      <dl class="kv">
+        <dt>Mode</dt><dd id="id-mode">—</dd>
+        <dt>BCH address</dt><dd id="id-bch">—</dd>
+        <dt>BCH pubkey</dt><dd id="id-bchpub">—</dd>
+        <dt>Nostr pubkey</dt><dd id="id-npubkey">—</dd>
+        <dt>npub</dt><dd id="id-npub">—</dd>
+        <dt>nsec (private!)</dt><dd id="id-nsec">—</dd>
+      </dl>
+      <div class="row">
+        <button class="ghost" id="btn-copy-nsec" type="button">Copy nsec</button>
+        <button class="ghost" id="btn-copy-npub" type="button">Copy npub</button>
+        <button class="ghost" id="btn-copy-bch" type="button">Copy BCH address</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. LINK -->
+  <section class="card" id="sec-link">
+    <h2><span class="n">2</span>Sign the link</h2>
+    <p class="sub">Both sides sign the same statement: the BCH key signs it as a Bitcoin signed-message
+    (ECDSA, verifiable in any BCH wallet), the Nostr key signs it as a Schnorr signature (NIP-01 style).
+    In same-key mode the two public keys are also mathematically the same key.</p>
+    <div class="row">
+      <button class="primary" id="btn-sign" type="button" disabled>Sign identity link</button>
+      <button class="ghost" id="btn-copy-att" type="button" disabled>Copy attestation JSON</button>
+      <button class="ghost" id="btn-dl-att" type="button" disabled>Download attestation</button>
+    </div>
+    <div id="att-out" class="hidden">
+      <label>Statement (signed by both keys)</label>
+      <pre class="out" id="att-statement"></pre>
+      <label>Attestation JSON</label>
+      <pre class="out" id="att-json"></pre>
+    </div>
+  </section>
+
+  <!-- 3. VERIFY -->
+  <section class="card" id="sec-verify">
+    <h2><span class="n">3</span>Verify — anyone can check this</h2>
+    <p class="sub">Paste any attestation JSON. The verifier needs no keys, no server and no blockchain
+    lookup: every check is pure cryptography on the data you paste.</p>
+    <label for="in-att">Attestation JSON</label>
+    <textarea id="in-att" placeholder='{"version":1,"mode":"same-key",…}'></textarea>
+    <div class="row">
+      <button class="primary" id="btn-verify" type="button">Verify attestation</button>
+      <button class="ghost" id="btn-sample" type="button">Load a fresh sample</button>
+    </div>
+    <div id="verify-out" class="hidden">
+      <div id="verify-verdict" class="verdict"></div>
+      <ul class="check" id="verify-checks"></ul>
+    </div>
+  </section>
+
+  <!-- 4. PUBLISH -->
+  <section class="card" id="sec-publish">
+    <h2><span class="n">4</span>Publish to Nostr (optional)</h2>
+    <p class="sub">Broadcast the link as a signed Nostr event (kind 1) to public relays, so the link is
+    discoverable forever. Your browser connects to the relays directly — no server in between.</p>
+    <div class="row">
+      <button class="primary" id="btn-publish" type="button" disabled>Publish to relays</button>
+    </div>
+    <p class="status" id="publish-status"></p>
+    <div id="event-out" class="hidden">
+      <label>Signed Nostr event (NIP-01)</label>
+      <pre class="out" id="event-json"></pre>
+    </div>
+  </section>
+
+  <!-- HOW IT WORKS -->
+  <section class="card howto">
+    <h2>How it works</h2>
+    <ol>
+      <li><b>Same key, two networks.</b> secp256k1 is the signature curve of both Bitcoin Cash and Nostr.
+        One private key derives a BCH address (compressed pubkey → HASH160 → cashaddr) and a Nostr
+        pubkey (the x-only BIP340 pubkey). The x-coordinate is identical — the link is provable from
+        public data alone.</li>
+      <li><b>Mutual signatures.</b> The BCH key signs the statement as a standard Bitcoin signed-message
+        (double-SHA256, ECDSA, recoverable — verifiable in Electron Cash / Paytaca). The Nostr key signs
+        the same statement with Schnorr (BIP340, NIP-01 style). Both signatures must verify, and the
+        statement must name both identifiers.</li>
+      <li><b>Cross-key mode.</b> Already have a BCH address and a Nostr account on different keys? Import
+        both and they mutually attest each other instead. The verifier checks the signatures, not the
+        key relationship.</li>
+      <li><b>Zero cost.</b> No transaction is broadcast, no gas, no fee. Verification is offline math.
+        Publishing is one optional Nostr event to public relays.</li>
+      <li><b>Why it matters.</b> Paytaca, BCHNostr and the BCH creator economy need Sybil-resistant,
+        portable identity: tips, reputation and social graphs that survive any single app dying. A
+        cryptographic BCH↔Nostr link is the primitive that makes "I am the same person here and there"
+        trustless.</li>
+    </ol>
+    <p class="sub">Built for the BCH BLAZE 2026 Paytaca bounty: “Build a proof of concept for self-sovereign
+    identity that cryptographically links Bitcoin Cash and Nostr identities.” Source:
+    <a href="https://github.com/" target="_blank" rel="noopener">GitHub repo</a> (link set at submission time) ·
+    Bounty board: <a href="https://bchblaze.cash/bounties/" target="_blank" rel="noopener">bchblaze.cash/bounties</a></p>
+  </section>
+</main>
+
+<footer>
+  BCH × Nostr Identity Link · BCH BLAZE 2026 · Keys never leave your browser · No funds involved · MIT licensed
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

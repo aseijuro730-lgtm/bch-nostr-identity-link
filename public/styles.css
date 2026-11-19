@@ -1,0 +1,63 @@
+/* BCH x Nostr Identity Link — dark, BCH-green, no frameworks */
+:root {
+  --bg: #0c1210; --panel: #121a16; --panel2: #16211b; --line: #243528;
+  --text: #e8f0e9; --muted: #9db3a4; --green: #0ac18e; --green-dim: #0a8f6b;
+  --amber: #f5a623; --red: #ef5350; --mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height: 1.55; }
+a { color: var(--green); }
+header.hero { padding: 56px 20px 28px; text-align: center;
+  background: radial-gradient(700px 300px at 50% -80px, rgba(10,193,142,.25), transparent 70%); }
+header.hero h1 { margin: 0 0 8px; font-size: clamp(28px, 5vw, 44px); line-height: 1.1; }
+header.hero h1 span { color: var(--green); }
+header.hero p { color: var(--muted); max-width: 680px; margin: 0 auto; font-size: 17px; }
+.badge { display: inline-block; font-size: 12px; letter-spacing: .12em; text-transform: uppercase;
+  border: 1px solid var(--green-dim); color: var(--green); border-radius: 999px; padding: 4px 12px; margin-bottom: 14px; }
+main { max-width: 920px; margin: 0 auto; padding: 0 20px 80px; }
+section.card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px;
+  padding: 24px; margin-top: 20px; }
+section.card h2 { margin: 0 0 4px; font-size: 21px; }
+section.card h2 .n { color: var(--green); margin-right: 8px; }
+section.card p.sub { color: var(--muted); margin: 0 0 16px; }
+label { display: block; font-size: 13px; color: var(--muted); margin: 14px 0 6px; }
+input[type=text], textarea, select { width: 100%; background: var(--panel2); color: var(--text);
+  border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; font-size: 14px; font-family: var(--mono); }
+textarea { min-height: 120px; resize: vertical; }
+button { cursor: pointer; border: 0; border-radius: 10px; padding: 11px 18px; font-size: 15px; font-weight: 600; }
+button.primary { background: var(--green); color: #04120c; }
+button.primary:hover { background: #0bd6a0; }
+button.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+button.ghost:hover { border-color: var(--green-dim); }
+button:disabled { opacity: .45; cursor: not-allowed; }
+.row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+.kv { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; font-size: 14px; margin-top: 12px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; font-family: var(--mono); word-break: break-all; }
+.callout { border: 1px solid var(--amber); background: rgba(245,166,35,.08); border-radius: 10px;
+  padding: 12px 14px; font-size: 14px; margin-top: 14px; }
+.callout b { color: var(--amber); }
+pre.out { background: #0a0f0c; border: 1px solid var(--line); border-radius: 10px; padding: 14px;
+  overflow-x: auto; font-size: 12.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+.check { list-style: none; padding: 0; margin: 12px 0 0; }
+.check li { padding: 7px 0 7px 30px; position: relative; font-size: 14.5px; }
+.check li::before { position: absolute; left: 0; top: 7px; font-weight: 700; }
+.check li.ok::before { content: "✓"; color: var(--green); }
+.check li.bad::before { content: "✗"; color: var(--red); }
+.check li.bad { color: #f0b6b4; }
+.check li small { display: block; color: var(--muted); font-family: var(--mono); font-size: 12px; }
+.verdict { font-size: 20px; font-weight: 800; padding: 12px 16px; border-radius: 10px; margin-top: 14px; }
+.verdict.ok { background: rgba(10,193,142,.15); color: var(--green); border: 1px solid var(--green-dim); }
+.verdict.bad { background: rgba(239,83,80,.12); color: var(--red); border: 1px solid var(--red); }
+.tabs { display: flex; gap: 8px; flex-wrap: wrap; }
+.tabs button { background: var(--panel2); color: var(--muted); border: 1px solid var(--line); }
+.tabs button.on { background: var(--green); color: #04120c; border-color: var(--green); }
+.howto ol { padding-left: 20px; } .howto li { margin-bottom: 8px; }
+.howto code, p code { background: var(--panel2); border: 1px solid var(--line); border-radius: 6px;
+  padding: 1px 6px; font-size: 13px; }
+footer { text-align: center; color: var(--muted); font-size: 13px; padding: 20px; }
+.hidden { display: none !important; }
+.status { font-size: 14px; color: var(--muted); margin-top: 10px; min-height: 20px; }
+.status b { color: var(--text); }
+@media (max-width: 640px) { .kv { grid-template-columns: 1fr; } .kv dt { margin-top: 8px; } }
