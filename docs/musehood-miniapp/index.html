@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Musehood — Mini App</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root { color-scheme: light dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 16px;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    background: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #111);
+  }
+  h1 { font-size: 30px; line-height: 1.1; margin: 0 0 4px; letter-spacing: -0.5px; }
+  h1 .menu-word { color: #7c3aed; }
+  .sub { color: var(--tg-theme-hint-color, #888); font-size: 13px; margin: 0 0 14px; }
+  .card {
+    border: 1px solid var(--tg-theme-section-separator-color, #ddd);
+    border-radius: 12px; padding: 12px; margin-bottom: 14px;
+    background: var(--tg-theme-secondary-bg-color, #f6f6f6);
+  }
+  .card p { margin: 6px 0; font-size: 14px; line-height: 1.5; }
+  /* Kartu status bot ala SATSET */
+  .bot-card { display: flex; align-items: center; gap: 12px; }
+  .bot-avatar {
+    flex: 0 0 auto; width: 48px; height: 48px; border-radius: 50%;
+    background: #7c3aed; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 800;
+  }
+  .bot-name { font-size: 17px; font-weight: 700; margin: 0; }
+  .bot-status { font-size: 13px; margin: 2px 0 0; color: var(--tg-theme-hint-color, #888); }
+  .dot {
+    display: inline-block; width: 9px; height: 9px; border-radius: 50%;
+    background: #22c55e; margin-right: 5px; vertical-align: -1px;
+  }
+  #outside { display: none; border-color: #f59e0b; }
+  #log {
+    min-height: 120px; max-height: 40vh; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .msg {
+    align-self: flex-end; max-width: 85%;
+    background: var(--tg-theme-button-color, #2481cc);
+    color: var(--tg-theme-button-text-color, #fff);
+    padding: 8px 12px; border-radius: 12px 12px 4px 12px;
+    font-size: 14px; line-height: 1.45; word-break: break-word; white-space: pre-wrap;
+  }
+  .note {
+    align-self: stretch; font-size: 13px; text-align: center;
+    color: var(--tg-theme-hint-color, #888); padding: 4px 8px;
+  }
+  /* Baris composer: tombol Menu biru di samping kolom ketik */
+  .composer { position: relative; }
+  form { display: flex; gap: 8px; }
+  #text {
+    flex: 1; resize: none; min-height: 44px; max-height: 120px;
+    padding: 10px 12px; font: inherit; font-size: 15px;
+    border: 1px solid var(--tg-theme-section-separator-color, #ccc);
+    border-radius: 12px; background: var(--tg-theme-bg-color, #fff);
+    color: var(--tg-theme-text-color, #111);
+  }
+  button {
+    align-self: flex-end; padding: 0 18px; height: 44px;
+    border: 0; border-radius: 12px; cursor: pointer;
+    background: var(--tg-theme-button-color, #2481cc);
+    color: var(--tg-theme-button-text-color, #fff);
+    font: inherit; font-weight: 600;
+  }
+  button:disabled { opacity: .5; cursor: default; }
+  #menuBtn { padding: 0 14px; font-size: 17px; white-space: nowrap; }
+  #counter { font-size: 12px; color: var(--tg-theme-hint-color, #888); text-align: right; margin-top: 4px; }
+  /* Menu popup ringkas (bukan grid besar) */
+  .menu {
+    position: absolute; left: 0; bottom: calc(100% + 8px);
+    width: min(320px, 100%); z-index: 10;
+    background: var(--tg-theme-secondary-bg-color, #fff);
+    border: 1px solid var(--tg-theme-section-separator-color, #ccc);
+    border-radius: 14px; padding: 6px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  }
+  .menu h2 {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--tg-theme-hint-color, #888);
+    margin: 6px 10px 4px;
+  }
+  .menu-item {
+    display: block; width: 100%; height: auto; min-height: 40px;
+    text-align: left; padding: 9px 12px;
+    background: transparent; color: var(--tg-theme-text-color, #111);
+    font-size: 15px; font-weight: 500; border-radius: 10px;
+  }
+  .menu-item:active { background: rgba(128, 128, 128, 0.18); }
+  .menu-seats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+  .menu-seats .menu-item { text-align: center; font-size: 14px; }
+</style>
+</head>
+<body>
+  <h1>MUSEHOOD <span class="menu-word">☰ Menu</span></h1>
+  <p class="sub">Mini App — mode tamu</p>
+
+  <div class="card bot-card">
+    <div class="bot-avatar" aria-hidden="true">M</div>
+    <div>
+      <p class="bot-name">MUSEHOOD</p>
+      <p class="bot-status"><span class="dot" aria-hidden="true"></span>@musehood_ai_bot • online</p>
+    </div>
+  </div>
+
+  <div class="card" id="info">
+    <p>Balasan Muse muncul di <b>chat Telegram</b> (bukan di halaman ini).</p>
+    <p>Kuota tamu: <b>15 pesan/hari</b>. Perintah khusus hanya untuk pemilik.</p>
+  </div>
+
+  <div class="card" id="outside">
+    <p>Pratinjau di luar Telegram — buka lewat tombol Mini App di <b>@musehood_ai_bot</b> untuk mengobrol dengan Muse.</p>
+  </div>
+
+  <div id="app" hidden>
+    <div class="card" id="log" aria-live="polite"></div>
+    <div class="composer" id="menuWrap">
+      <div class="menu" id="menu" hidden role="menu" aria-label="Menu Musehood">
+        <h2>Aksi</h2>
+        <button type="button" class="menu-item" data-action="chat">Ngobrol dengan Muse</button>
+        <button type="button" class="menu-item" data-action="prefix" data-prefix="Tugas: ">Tugas: … (pipeline 6 tahap)</button>
+        <button type="button" class="menu-item" data-action="prefix" data-prefix="Gambar: ">Gambar: … (Argon)</button>
+        <button type="button" class="menu-item" data-action="prefix" data-prefix="Tanya Progres">Tanya Progres</button>
+        <h2>Kursi</h2>
+        <div class="menu-seats">
+          <button type="button" class="menu-item" data-action="prefix" data-prefix="@Opus ">@Opus</button>
+          <button type="button" class="menu-item" data-action="prefix" data-prefix="@Plamo ">@Plamo</button>
+          <button type="button" class="menu-item" data-action="prefix" data-prefix="@GLM ">@GLM</button>
+          <button type="button" class="menu-item" data-action="prefix" data-prefix="@Argon ">@Argon</button>
+          <button type="button" class="menu-item" data-action="prefix" data-prefix="@Deepseek ">@Deepseek</button>
+          <button type="button" class="menu-item" data-action="prefix" data-prefix="@Fable ">@Fable</button>
+        </div>
+      </div>
+      <form id="form">
+        <button type="button" id="menuBtn" aria-haspopup="true" aria-expanded="false" aria-controls="menu">☰ Menu</button>
+        <textarea id="text" rows="1" maxlength="1000" placeholder="Tulis pesan untuk Muse…" aria-label="Pesan"></textarea>
+        <button type="submit" id="send">Kirim</button>
+      </form>
+    </div>
+    <div id="counter">0 / 1000</div>
+  </div>
+
+<script>
+(function () {
+  var tg = window.Telegram && window.Telegram.WebApp;
+  var initData = tg && tg.initData ? tg.initData : "";
+
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  var app = document.getElementById("app");
+  var outside = document.getElementById("outside");
+  var log = document.getElementById("log");
+  var form = document.getElementById("form");
+  var input = document.getElementById("text");
+  var sendBtn = document.getElementById("send");
+  var counter = document.getElementById("counter");
+  var menuBtn = document.getElementById("menuBtn");
+  var menu = document.getElementById("menu");
+  var menuWrap = document.getElementById("menuWrap");
+
+  if (!initData) {
+    // Dibuka di luar Telegram: sembunyikan form kirim.
+    outside.style.display = "block";
+    return;
+  }
+  app.hidden = false;
+
+  function updateCounter() {
+    counter.textContent = input.value.length + " / 1000";
+  }
+
+  function addNote(text) {
+    var el = document.createElement("div");
+    el.className = "note";
+    el.textContent = text;
+    log.appendChild(el);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  // Awalan yang dikenali menu (untuk diganti, bukan ditumpuk).
+  var KNOWN_PREFIX = /^(Tugas:\s*|Gambar:\s*|Tanya Progres\s*|@[A-Za-z]+\s*)/;
+  function stripPrefix(value) {
+    return value.replace(KNOWN_PREFIX, "");
+  }
+
+  function closeMenu() {
+    menu.hidden = true;
+    menuBtn.setAttribute("aria-expanded", "false");
+  }
+
+  function toggleMenu() {
+    menu.hidden = !menu.hidden;
+    menuBtn.setAttribute("aria-expanded", String(!menu.hidden));
+  }
+
+  menuBtn.addEventListener("click", function (ev) {
+    ev.stopPropagation();
+    toggleMenu();
+  });
+
+  // Ketuk di luar menu menutupnya.
+  document.addEventListener("click", function (ev) {
+    if (menu.hidden) return;
+    var target = ev.target;
+    if (target && target.closest && target.closest("#menuWrap")) return;
+    closeMenu();
+  });
+
+  // Aksi menu: isi awalan ke kolom ketik lalu fokus (belum dikirim).
+  var items = menu.querySelectorAll(".menu-item");
+  for (var i = 0; i < items.length; i++) {
+    items[i].addEventListener("click", function () {
+      var action = this.getAttribute("data-action");
+      var rest = stripPrefix(input.value);
+      if (action === "chat") {
+        input.value = rest; // hanya buang awalan, teks bebas tetap ada
+      } else {
+        var prefix = this.getAttribute("data-prefix") || "";
+        input.value = rest ? prefix + (prefix.slice(-1) === " " ? "" : " ") + rest : prefix;
+      }
+      updateCounter();
+      closeMenu();
+      input.focus();
+    });
+  }
+
+  input.addEventListener("input", updateCounter);
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    var text = input.value.trim();
+    if (!text) return; // pesan kosong tidak dikirim
+    if (text.length > 1000) text = text.slice(0, 1000);
+
+    // Kirim ke bot lewat web_app_data. TIDAK ada token/key di sini.
+    tg.sendData(JSON.stringify({ initData: initData, text: text }));
+
+    var bubble = document.createElement("div");
+    bubble.className = "msg";
+    bubble.textContent = text;
+    log.appendChild(bubble);
+    addNote("Terkirim — aplikasi akan tertutup, balasan Muse muncul di chat Telegram.");
+    input.value = "";
+    updateCounter();
+    sendBtn.disabled = true;
+  });
+})();
+</script>
+</body>
+</html>
