@@ -132,3 +132,59 @@ Tidak ada pesan ke pengguna nyata; tidak ada token/key di harness.
   token/key di sini" tanpa nilai.
 - Belum diuji di browser Telegram nyata (butuh URL HTTPS publik +
   Menu Button, yang sudah aktif dari penerbitan sebelumnya).
+
+## Quick chip + verifikasi isolasi backend (22 Nov 2026 ~16:00 WIB)
+
+Harness: `/tmp/test-miniapp-guest.js` diperluas (chip). Perintah:
+`node /tmp/test-miniapp-guest.js`. Tidak ada pesan ke pengguna nyata;
+tidak ada token/key di harness.
+
+**Ringkasan: 82/82 PASS, 0 FAIL** (sebelumnya 66/66), antara lain:
+
+- Quick chip: 8 chip tampil; chip "Tugas: …"/"Gambar: …"/"Tanya Progres"
+  mengisi/mengganti awalan seperti menu (teks bebas tetap ada); chip
+  "Ngobrol dengan Muse" membuang awalan; keempat chip berat ("Buat
+  Gambar", "Buat Video", "Buat Musik", "Coding App") TIDAK memanggil
+  `sendData`, TIDAK mengubah input, dan menampilkan catatan kuning
+  "Fitur '…' khusus pemilik — tamu hanya bisa ngobrol dengan Muse
+  (kuota 15 pesan/hari)".
+- Statis: `.chips` `overflow-x: auto`; frasa "khusus pemilik" muncul
+  ≥5x (4 tag chip + kartu info); kartu info menyebut fitur berat khusus
+  pemilik + "Sisa kuota harian tidak tampil di halaman ini".
+- `grep` token/key/secret/`TELEGRAM_BOT_TOKEN` di `index.html` baru:
+  0 kena.
+- Catatan: satu kegagalan awal berasal dari ekspektasi harness (chip
+  "Tanya Progres" atas teks "Tugas: riset" — halaman benar
+  menghasilkan "Tanya Progres riset", teks bebas dipertahankan seperti
+  menu) — diperbaiki di harness, halaman tidak diubah untuk itu.
+
+### Verifikasi isolasi backend (baca kode + state + log, tanpa ubah arsitektur)
+
+- Ruang tamu: `state/telegram-guest-room.json` — "Tamu Telegram",
+  `room_id` 4, "hanya kursi Muse (model bawaan, tanpa gateway owner) …
+  BUKAN ruang pribadi; guest tidak pernah masuk ke ruang 1/2/3".
+- Routing (README jembatan + `logs/telegram-2026-11-22.md`): tamu
+  dipisah dari owner lewat `from.id == OWNER_TELEGRAM_ID`; tamu hanya
+  kursi Muse di ruang 4, provider "Muse Bawaan", source "muse". Uji
+  tercatat 22 Nov: balasan uji ke room 4 (id 89, latency 5660ms) TANPA
+  gateway owner; ruang 1/2/3 tidak berubah (51/0/36); 3 slot gateway +
+  ruang 1/2/3 utuh.
+- Kuota: `quota.py` — 15 pesan/hari per `telegram_user_id`, tanggal WIB,
+  state `state/telegram-quota.json` (saat dicek: `{}`, belum ada pemakaian
+  hari ini). `quota.py check 999888777` (id dummy, tanpa mengubah state):
+  `count 0, remaining 15, allowed true, limit 15`. Log tercatat: initData
+  asli diterima (kuota 15 → 14), initData palsu/kedaluwarsa ditolak,
+  pesan ke-16 ditolak kuota habis — penegakan + pesan jelas lewat balasan
+  bot di chat Telegram.
+- Token/key: `TELEGRAM_BOT_TOKEN` hanya dibaca dari `.env` (0600) di
+  `poll.py`/`send.py`/`menu.py`/`verify.py` — tidak pernah dicetak;
+  tidak ada token/key di berkas statis (grep 0 kena).
+- Sisa kuota LIVE tidak bisa tampil dari halaman statis: tidak ada
+  endpoint HTTP di jembatan (`grep http.server|Flask|FastAPI|uvicorn`
+  di `scripts/`/`state/`: 0 kena) — satu-satunya jalur data adalah
+  `sendData` → Bot API → cron worker di VM. Menampilkan sisa kuota
+  butuh endpoint backend baru + otentikasi per pengguna — TIDAK dibangun
+  (di luar perintah: jangan ubah arsitektur yang sudah berjalan).
+  Batasan ini ditulis jujur di halaman (kartu info) dan di README.
+- Belum diuji di browser Telegram nyata (butuh URL HTTPS publik +
+  Menu Button, yang sudah aktif dari penerbitan sebelumnya).

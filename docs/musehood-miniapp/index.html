@@ -104,6 +104,29 @@
     color: #14532d; background: #dcfce7; border: 2px solid #000;
     border-radius: 10px; box-shadow: 2px 2px 0 #000; font-weight: 600;
   }
+  .note.owner-note {
+    color: #713f12; background: #fef9c3; border: 2px solid #000;
+    border-radius: 10px; box-shadow: 2px 2px 0 #000; font-weight: 600;
+  }
+  /* Quick chip ala aplikasi Musehood — di atas kolom ketik */
+  .chips {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding: 2px 2px 10px; margin-bottom: 2px;
+  }
+  .chip {
+    flex: 0 0 auto; height: auto; min-height: 36px;
+    background: #fff; color: #09090b; border: 2.5px solid #000;
+    border-radius: 999px; box-shadow: 3px 3px 0 #000;
+    padding: 7px 12px; font-size: 13px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .chip:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 #000; }
+  .chip-owner { background: #fef9c3; }
+  .chip-tag {
+    font-size: 10px; font-weight: 700; background: #000; color: #fde047;
+    border-radius: 999px; padding: 2px 6px; margin-left: 4px;
+    vertical-align: 1px; white-space: nowrap;
+  }
   /* Baris composer: tombol Menu biru di samping kolom ketik */
   .composer { position: relative; }
   form { display: flex; gap: 8px; min-width: 0; }
@@ -183,6 +206,8 @@
     <p>Kamu masuk sebagai <b>tamu</b> — tanpa akses ruang pribadi.</p>
     <p>Balasan Muse muncul di <b>chat Telegram @musehood_ai_bot</b> (bukan di halaman ini), biasanya dalam ~1 menit.</p>
     <p>Kuota tamu: <b>15 pesan/hari</b>. Perintah khusus hanya untuk pemilik.</p>
+    <p>Fitur berat (Buat Gambar/Video/Musik, Coding App) <b>khusus pemilik</b>.</p>
+    <p>Sisa kuota harian tidak tampil di halaman ini — bila kuota habis, bot memberitahu lewat chat Telegram.</p>
   </div>
 
   <div class="card" id="outside">
@@ -203,6 +228,16 @@
     <p class="seat-note">Yang membalas di sini: <b>Muse</b> — ketuk kursi untuk mengisi awalan @…</p>
 
     <div id="log" aria-live="polite"></div>
+    <div class="chips" id="chips" aria-label="Aksi cepat">
+      <button type="button" class="chip" data-action="chat">Ngobrol dengan Muse</button>
+      <button type="button" class="chip" data-action="prefix" data-prefix="Tugas: ">Tugas: …</button>
+      <button type="button" class="chip" data-action="prefix" data-prefix="Gambar: ">Gambar: …</button>
+      <button type="button" class="chip" data-action="prefix" data-prefix="Tanya Progres">Tanya Progres</button>
+      <button type="button" class="chip chip-owner" data-owner="Buat Gambar">Buat Gambar<span class="chip-tag">khusus pemilik</span></button>
+      <button type="button" class="chip chip-owner" data-owner="Buat Video">Buat Video<span class="chip-tag">khusus pemilik</span></button>
+      <button type="button" class="chip chip-owner" data-owner="Buat Musik">Buat Musik<span class="chip-tag">khusus pemilik</span></button>
+      <button type="button" class="chip chip-owner" data-owner="Coding App">Coding App<span class="chip-tag">khusus pemilik</span></button>
+    </div>
     <div class="composer" id="menuWrap">
       <div class="menu" id="menu" hidden role="menu" aria-label="Menu Musehood">
         <h2>Aksi</h2>
@@ -311,6 +346,22 @@
 
   bindActionButtons(menu.querySelectorAll(".menu-item"));
   if (seatsEl) bindActionButtons(seatsEl.querySelectorAll(".seat"));
+
+  // Quick chip: 4 aksi obrolan sama seperti menu/kursi; 4 fitur berat
+  // khusus pemilik — ketuk hanya menampilkan penjelasan, TIDAK mengirim.
+  var chipsEl = document.getElementById("chips");
+  if (chipsEl) {
+    var chips = chipsEl.querySelectorAll(".chip");
+    for (var k = 0; k < chips.length; k++) {
+      chips[k].addEventListener("click", function () {
+        if (this.className.indexOf("chip-owner") !== -1) {
+          addNote("Fitur '" + this.getAttribute("data-owner") + "' khusus pemilik — tamu hanya bisa ngobrol dengan Muse (kuota 15 pesan/hari).", "owner-note");
+          return;
+        }
+        applyAction(this.getAttribute("data-action"), this.getAttribute("data-prefix") || "");
+      });
+    }
+  }
 
   menuBtn.addEventListener("click", function (ev) {
     ev.stopPropagation();

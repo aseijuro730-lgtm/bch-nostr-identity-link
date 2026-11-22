@@ -38,8 +38,34 @@ lewat `Telegram.WebApp.sendData`, balasan Muse muncul di chat Telegram.
   "Terkirim ke bot ✓ — balasan Muse muncul di chat Telegram
   @musehood_ai_bot (≤ ~1 menit)", tombol Kirim nonaktif sesaat
   (label "Terkirim ✓") lalu aktif lagi setelah 1,5 detik.
+  Di atas kolom ketik ada baris quick chip (scroll horizontal di HP):
+  "Ngobrol dengan Muse", "Tugas: …", "Gambar: …", "Tanya Progres"
+  (sama seperti aksi menu/kursi — mengisi awalan, belum mengirim),
+  plus "Buat Gambar", "Buat Video", "Buat Musik", "Coding App" yang
+  bertanda "khusus pemilik" — diketuk hanya menampilkan penjelasan
+  bahwa fitur itu khusus pemilik dan tamu hanya bisa ngobrol dengan
+  Muse (kuota 15 pesan/hari); TIDAK mengirim perintah apa pun.
+  Sisa kuota harian TIDAK bisa tampil dari halaman statis ini (tidak
+  ada endpoint backend); penegakan kuota + pesan jelas saat kuota habis
+  lewat balasan bot di chat Telegram (`quota.py` + routing cron worker).
 - `TESTS.md` — hasil uji verifikasi initData sisi server + uji menu +
-  uji perapian tamu (harness Node, DOM tiruan + stub Telegram.WebApp).
+  uji perapian tamu (harness Node, DOM tiruan + stub Telegram.WebApp)
+  + uji quick chip + verifikasi isolasi backend.
+
+## Jalur hosting / endpoint
+
+- Halaman statis: GitHub Pages, repo `aseijuro730-lgtm/bch-nostr-identity-link`,
+  branch `main`, folder `docs/musehood-miniapp/` → URL
+  `https://aseijuro730-lgtm.github.io/bch-nostr-identity-link/musehood-miniapp/`.
+  Tidak ada server/endpoint di balik halaman ini.
+- Backend bot: VM ini — cron `musehood-telegram-bot-poll` tiap 1 menit
+  (`poll.py` getUpdates → `state/telegram-inbox/`), cron worker memproses
+  inbox: `web_app_data` → parse JSON `{initData, text}` → `verify.py`
+  (HMAC server-side) → cek kuota (`quota.py`, 15/hari per tanggal WIB)
+  → teruskan ke ruang tamu id 4, kursi Muse (model bawaan, BUKAN gateway
+  owner) → balasan dikirim ke chat Telegram via `send.py`. Token bot
+  HANYA di `~/workspace/musehood-bridge/.env` (0600); tidak ada token/key
+  di berkas statis/repo. Tamu TIDAK PERNAH masuk ruang 1/2/3.
 
 ## Cara pakai
 
