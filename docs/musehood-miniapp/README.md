@@ -5,9 +5,19 @@ Halaman statis Mini App Telegram untuk Musehood. Bot Telegram
 lewat `Telegram.WebApp.sendData`, balasan Muse muncul di chat Telegram.
 
 - `index.html` — halaman Mini App (tanpa build step, tanpa token/key).
-  Gaya menu SATSET: header "MUSEHOOD ☰ Menu", kartu status bot
-  @musehood_ai_bot online, dan SATU tombol biru "☰ Menu" di samping
-  kolom ketik. Sekali ketuk, muncul popup menu ringkas (bukan grid besar)
+  Tampilan disamakan dengan aplikasi Musehood asli (Neo-Brutalism +
+  Guild Chat): background Indigo #1e1b4b berpola titik, header kuning
+  retro "MUSEHOOD" + pill "Pemilik: Malik" dan "Admin Muse • Hadir
+  8/8", strip 7 kursi (avatar huruf + nama + peran, warna bubble
+  masing-masing) di atas area chat, bubble Malik biru #3b82f6 rata
+  kanan, semua kartu/bubble/button border 2.5px solid #000 +
+  box-shadow 4px 4px 0 #000, font Space Grotesk + Inter.
+  Jujur: halaman statis TIDAK bisa menampilkan percakapan live 7
+  kursi — strip kursi hanya roster kehadiran (catatan "Yang membalas
+  di sini: Muse"), ketuk kursi mengisi awalan @NamaKursi, pesan
+  terkirim tampil sebagai bubble Malik lokal, dan balasan Muse tetap
+  masuk ke chat Telegram. SATU tombol biru "☰ Menu" di samping kolom
+  ketik; sekali ketuk, muncul popup menu ringkas (bukan grid besar)
   berisi: "Ngobrol dengan Muse", "Tugas: …", "Gambar: …",
   "Tanya Progres", plus kursi @Opus, @Plamo, @GLM, @Argon, @Deepseek,
   @Fable. Ketuk aksi → awalannya terisi di kolom ketik (awalan lama

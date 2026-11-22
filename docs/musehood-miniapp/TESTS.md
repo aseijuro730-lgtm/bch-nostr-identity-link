@@ -64,3 +64,33 @@ nyata; tidak ada token/key di harness.
   halaman — keduanya diperbaiki di harness, halaman tidak diubah untuk itu.
 - Belum diuji di browser Telegram nyata (butuh URL HTTPS publik + Menu
   Button, repo `musehood-miniapp` masih menunggu dibuat).
+
+## Tampilan Musehood asli — uji perilaku lokal (22 Nov 2026 ~15:45 WIB)
+
+Harness baru: `/tmp/test-miniapp-musehood.js` (Node, DOM tiruan + stub
+`Telegram.WebApp`, menjalankan `<script>` inline halaman apa adanya).
+Perintah: `node /tmp/test-miniapp-musehood.js`. Tidak ada pesan ke
+pengguna nyata; tidak ada token/key di harness.
+
+**Ringkasan: 43/43 PASS**, antara lain:
+
+- Semua uji menu SATSET sebelumnya tetap lolos (menu buka/tutup,
+  awalan Tugas:/Gambar:/Tanya Progres/@kursi, ganti awalan bukan
+  menumpuk, submit kosong tidak memanggil `sendData`, payload
+  `{initData, text}` benar, bubble lokal, luar Telegram).
+- Strip kursi: 7 kursi terikat; klik kursi Opus → kolom ketik
+  `@Opus `; klik kursi Muse membuang awalan; klik kursi Fable
+  mengganti awalan (`Tugas: riset` → `@Fable riset`).
+- Statis: background indigo #1e1b4b, header kuning #fde047, bubble
+  Malik biru #3b82f6, ketujuh warna kursi (#bbf7d0, #fef08a, #fecaca,
+  #bae6fd, #e9d5ff, #99f6e4, #fbcfe8), border 2.5px solid #000 +
+  shadow 4px 4px 0 #000, pill "Pemilik: Malik" dan "Admin Muse •
+  Hadir 8/8", catatan jujur "Yang membalas di sini: Muse", font
+  Space Grotesk, peran ketujuh kursi tampil.
+- `grep` token/key di `index.html` baru: 0 kena; halaman memuat
+  `telegram-web-app.js`; 10 item menu + 7 chip kursi ditemukan.
+- Catatan: dua kegagalan awal berasal dari harness-nya sendiri
+  (input tidak di-reset sebelum uji "Tugas:" setelah uji kursi) —
+  diperbaiki di harness, halaman tidak diubah untuk itu.
+- Belum diuji di browser Telegram nyata (butuh URL HTTPS publik +
+  Menu Button, yang sudah aktif dari penerbitan sebelumnya).
