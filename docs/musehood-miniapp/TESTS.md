@@ -94,3 +94,41 @@ pengguna nyata; tidak ada token/key di harness.
   diperbaiki di harness, halaman tidak diubah untuk itu.
 - Belum diuji di browser Telegram nyata (butuh URL HTTPS publik +
   Menu Button, yang sudah aktif dari penerbitan sebelumnya).
+
+## Perapian tamu — uji perilaku lokal (22 Nov 2026 ~15:55 WIB)
+
+Harness baru: `/tmp/test-miniapp-guest.js` (Node, DOM tiruan + stub
+`Telegram.WebApp` + stub penangkap `setTimeout`, menjalankan `<script>`
+inline halaman apa adanya). Perintah: `node /tmp/test-miniapp-guest.js`.
+Tidak ada pesan ke pengguna nyata; tidak ada token/key di harness.
+
+**Ringkasan: 66/66 PASS, 0 FAIL**, antara lain:
+
+- Semua uji menu SATSET + tampilan Musehood sebelumnya tetap lolos
+  (menu buka/tutup, awalan Tugas:/Gambar:/Tanya Progres/@kursi, ganti
+  awalan bukan menumpuk, submit kosong tidak memanggil `sendData`,
+  payload `{initData, text}` benar, bubble lokal, luar Telegram).
+- Badge tamu: pill "Pemilik: Malik" sudah TIDAK ada; pill "Mode Tamu •
+  15 pesan/hari" tampil; kartu info menyebut tamu tanpa akses ruang
+  pribadi + balasan di chat Telegram @musehood_ai_bot dalam ~1 menit;
+  pill "Admin Muse • Hadir 8/8" tetap ada.
+- Feedback kirim: setelah submit, log menampilkan status hijau
+  "Terkirim ke bot ✓ — balasan Muse muncul di chat Telegram
+  @musehood_ai_bot (≤ ~1 menit)"; tombol Kirim disabled sesaat dengan
+  label "Terkirim ✓"; timer re-enable 1500ms dijadwalkan; setelah timer
+  berjalan tombol aktif lagi dan label kembali "Kirim".
+- Layout HP 360px (cek CSS sistematis + aritmetika): body
+  `overflow-x: hidden`, `.wrap` width 100%, `#text` `min-width: 0` +
+  `flex: 1 1 auto`, tombol `flex-shrink: 0`, media query ≤420px ada
+  (kursi 62px, MenuBtn padding 0 10px, Kirim padding 0 12px, h1 26px,
+  body padding 10px); aritmetika 360px: konten 340px − MenuBtn ~73px −
+  Kirim ~69px − gap 16px = sisa textarea 182px → baris composer muat;
+  strip kursi total 482px > konten 340px → di-scroll horizontal
+  internal (`overflow-x: auto`), halaman sendiri tidak bergeser;
+  menu popup `min(320px, 100%)` muat; placeholder "Tulis pesan untuk
+  Muse" ada.
+- `grep` token/key/secret/`TELEGRAM_BOT_TOKEN` di `index.html` baru:
+  0 kena; satu-satunya kata "token" adalah komentar penjelas "TIDAK ada
+  token/key di sini" tanpa nilai.
+- Belum diuji di browser Telegram nyata (butuh URL HTTPS publik +
+  Menu Button, yang sudah aktif dari penerbitan sebelumnya).

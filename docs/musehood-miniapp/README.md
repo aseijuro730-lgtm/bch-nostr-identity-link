@@ -7,11 +7,21 @@ lewat `Telegram.WebApp.sendData`, balasan Muse muncul di chat Telegram.
 - `index.html` — halaman Mini App (tanpa build step, tanpa token/key).
   Tampilan disamakan dengan aplikasi Musehood asli (Neo-Brutalism +
   Guild Chat): background Indigo #1e1b4b berpola titik, header kuning
-  retro "MUSEHOOD" + pill "Pemilik: Malik" dan "Admin Muse • Hadir
-  8/8", strip 7 kursi (avatar huruf + nama + peran, warna bubble
+  retro "MUSEHOOD" + pill "Mode Tamu • 15 pesan/hari" dan "Admin Muse •
+  Hadir 8/8", strip 7 kursi (avatar huruf + nama + peran, warna bubble
   masing-masing) di atas area chat, bubble Malik biru #3b82f6 rata
   kanan, semua kartu/bubble/button border 2.5px solid #000 +
   box-shadow 4px 4px 0 #000, font Space Grotesk + Inter.
+  Halaman ini KHUSUS TAMU: badge "Pemilik: Malik" sudah diganti
+  indikator Mode Tamu + kuota 15 pesan/hari, dan kartu info menjelaskan
+  tamu tanpa akses ruang pribadi serta balasan Muse muncul di chat
+  Telegram @musehood_ai_bot (biasanya ~1 menit, bukan di halaman ini).
+  Responsif HP: `overflow-x: hidden` di body, `.wrap` width 100%,
+  kolom ketik `min-width: 0` + tombol `flex-shrink: 0` agar baris
+  Menu/input/Kirim tidak meluber, dan media query ≤420px memperkecil
+  padding, h1 26px, kursi 62px, dan padding tombol — diuji muat di
+  lebar 360px (sisa textarea ~182px); strip kursi di-scroll horizontal
+  secara internal (roster), halaman sendiri tidak bergeser.
   Jujur: halaman statis TIDAK bisa menampilkan percakapan live 7
   kursi — strip kursi hanya roster kehadiran (catatan "Yang membalas
   di sini: Muse"), ketuk kursi mengisi awalan @NamaKursi, pesan
@@ -24,8 +34,12 @@ lewat `Telegram.WebApp.sendData`, balasan Muse muncul di chat Telegram.
   diganti, bukan ditumpuk) dan kolom ketik langsung fokus; "Ngobrol
   dengan Muse" hanya membuang awalan. Ketuk di luar menu menutupnya.
   Kirim tetap via `sendData(JSON {initData, text})`, maks 1000 karakter,
-  pesan kosong tidak dikirim.
-- `TESTS.md` — hasil uji verifikasi initData sisi server + uji menu.
+  pesan kosong tidak dikirim; setelah kirim tampil status hijau
+  "Terkirim ke bot ✓ — balasan Muse muncul di chat Telegram
+  @musehood_ai_bot (≤ ~1 menit)", tombol Kirim nonaktif sesaat
+  (label "Terkirim ✓") lalu aktif lagi setelah 1,5 detik.
+- `TESTS.md` — hasil uji verifikasi initData sisi server + uji menu +
+  uji perapian tamu (harness Node, DOM tiruan + stub Telegram.WebApp).
 
 ## Cara pakai
 
